@@ -41,17 +41,17 @@ async function handleRequest(request,env){const url=new URL(request.url); if(url
  if(path==='/api/admin/logout'&&request.method==='POST')return json({ok:true});
  if(path.startsWith('/api/media/')&&request.method==='GET'){
   if(!env.COURSE_FILES)return json({error:'R2 não configurado.'},503);
-  const key=decodeURIComponent(path.slice('/api/media/'.length));if(!/^course-videos\/[a-zA-Z0-9-]+\.(mp4|webm)$/.test(key))return json({error:'Arquivo inválido.'},400);
+  const key=decodeURIComponent(path.slice('/api/media/'.length));if(!/^course-(videos|images)\/[a-zA-Z0-9-]+\.(mp4|webm|jpg|png|webp)$/.test(key))return json({error:'Arquivo inválido.'},400);
   const object=await env.COURSE_FILES.get(key);if(!object)return json({error:'Não encontrado.'},404);
-  return new Response(object.body,{headers:{'content-type':object.httpMetadata?.contentType||'video/mp4','cache-control':'public, max-age=3600','accept-ranges':'none','x-content-type-options':'nosniff'}});
+  return new Response(object.body,{headers:{'content-type':object.httpMetadata?.contentType||(key.startsWith('course-images/')?'image/jpeg':'video/mp4'),'cache-control':'public, max-age=3600','accept-ranges':'none','x-content-type-options':'nosniff'}});
  }
  if(path==='/api/admin/upload'&&request.method==='PUT'){
   if(!await valid(request,env))return json({error:'Não autorizado.'},401);
   if(!env.COURSE_FILES)return json({error:'Configure o binding R2 COURSE_FILES no wrangler.toml.'},503);
   const mime=request.headers.get('content-type')||'';
-  if(!['video/mp4','video/webm'].includes(mime))return json({error:'Somente MP4 ou WebM.'},415);
-  const len=Number(request.headers.get('content-length')||0);if(len>100*1024*1024)return json({error:'Máximo 100 MB.'},413);
-  const key='course-videos/'+crypto.randomUUID()+(mime==='video/webm'?'.webm':'.mp4');
+  if(!['video/mp4','video/webm','image/jpeg','image/png','image/webp'].includes(mime))return json({error:'Formato não permitido.'},415);
+  const len=Number(request.headers.get('content-length')||0);if(len>(mime.startsWith('image/')?8:100)*1024*1024)return json({error:'Máximo 100 MB.'},413);
+  const ext={'video/mp4':'.mp4','video/webm':'.webm','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp'}[mime];const key=(mime.startsWith('image/')?'course-images/':'course-videos/')+crypto.randomUUID()+ext;
   try{await env.COURSE_FILES.put(key,request.body,{httpMetadata:{contentType:mime}});return json({url:'/api/media/'+key})}catch(e){return json({error:'Falha no armazenamento R2.'},500)}
  }
  if(path==='/api/admin/overrides'){
@@ -63,7 +63,7 @@ async function handleRequest(request,env){const url=new URL(request.url); if(url
   if(request.method==='PUT'){
    if(!env.COURSE_DB)return json({error:'Banco D1 não configurado. Use o modo local de teste.'},503);
    const body=await request.json().catch(()=>({}));const value=JSON.stringify(body.overrides||{});
-   if(value.length>150000)return json({error:'Dados grandes demais.'},413);
+   if(value.length>1500000)return json({error:'Dados grandes demais.'},413);
    await env.COURSE_DB.prepare('INSERT INTO settings(key,data) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET data=excluded.data').bind('course_overrides',value).run();return json({ok:true});
   }
  }

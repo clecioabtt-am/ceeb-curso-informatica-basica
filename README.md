@@ -69,3 +69,11 @@ O algoritmo de hash é obrigatório em `crypto.subtle.importKey` para chaves HMA
 No Cloudflare Production mantenha os Secrets `ADMIN_PASSWORD` e `ADMIN_SESSION_SECRET`.
 Para usar D1, mantenha no `wrangler.toml` o binding `COURSE_DB` com o `database_id` real do banco.
 O pacote preserva a configuração original do wrangler.toml para evitar inserir UUID desconhecido; caso já tenha um `wrangler.toml` funcional com D1, preserve sua seção `[[d1_databases]]` ao atualizar.
+
+
+## Editor ilustrado e múltiplos vídeos
+No ADM, selecione um módulo e cole texto formatado no editor de cada tópico. Envie imagens JPG/PNG/WebP ao R2 (até 8 MB por arquivo). Cada vídeo enviado é adicionado à lista do tópico; também é possível colocar links HTTPS, um por linha. Na visão do aluno, use as setas para alternar entre vídeos. Clique em Salvar alterações para publicar no D1.
+
+Atenção: imagens coladas de sites externos podem não ser transportadas pelo navegador; nesse caso, envie os arquivos pelo botão Inserir imagens. Elementos interativos do ChatGPT não são transferidos automaticamente. O editor preserva HTML básico, tabelas, listas, títulos e imagens HTTPS; scripts e embeds são removidos por segurança.
+
+Para ativar o D1, descomente [[d1_databases]] em wrangler.toml e substitua database_id pelo ID real. Execute schema.sql no banco remoto ou no SQL Editor do painel Cloudflare. O schema usa CREATE TABLE IF NOT EXISTS e preserva dados existentes.
