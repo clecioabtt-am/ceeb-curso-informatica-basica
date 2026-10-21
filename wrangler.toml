@@ -1,4 +1,3 @@
-
 name = "ceeb-curso-informatica-basica"
 main = "src/worker.js"
 compatibility_date = "2026-09-15"
@@ -11,7 +10,6 @@ binding = "ASSETS"
 binding = "COURSE_FILES"
 bucket_name = "ceeb-curso-basico-files"
 
-
-# Para trocar a senha no ambiente publicado:
-# npx wrangler secret put ADMIN_PASSWORD
-# O projeto inicia com senha provisória Clecio40 (somente para testes).
+# Configure ADMIN_PASSWORD como Secret no painel Cloudflare.
+# Não coloque senhas em arquivos versionados no GitHub.
+# Para persistência global das edições, configure separadamente o D1 COURSE_DB.

@@ -24,6 +24,7 @@ async function valid(request,env){
 }
 export default {async fetch(request,env){const url=new URL(request.url); if(url.pathname.startsWith('/api/')){
  const path=url.pathname;
+ if(path==='/api/health')return json({ok:true,service:'CEEB Informática Básica',r2Configured:!!env.COURSE_FILES,d1Configured:!!env.COURSE_DB,adminPasswordConfigured:!!env.ADMIN_PASSWORD});
  if(path==='/api/status')return json({ok:true,mode:'open-test',platform:'CEEB Informática Básica'});
  if(path==='/api/admin/login'&&request.method==='POST'){
   const {password=''}=await request.json().catch(()=>({}));

@@ -39,3 +39,11 @@ bucket_name = "ceeb-curso-basico-files"
 As sessões agora usam tokens assinados com HMAC-SHA256, válidos entre instâncias do Cloudflare Worker por 8 horas. Configure `ADMIN_PASSWORD` como secret no Worker. Opcionalmente, configure também `ADMIN_SESSION_SECRET` com uma chave aleatória longa e independente. Depois do deploy, saia do painel administrativo e entre novamente para receber um token novo.
 
 **Observação:** o logout remove o token do navegador, mas não revoga imediatamente um token já copiado; ele expira em até 8 horas. Alterar `ADMIN_SESSION_SECRET` invalida todas as sessões. O endpoint de upload continua limitado a 100 MB, mas limites efetivos da plataforma Cloudflare podem ser menores conforme o plano.
+
+
+## V4 — diagnóstico de login
+- Login exibe mensagens reais da API em vez de uma mensagem genérica.
+- GET `/api/health` informa se os bindings R2, D1 e o secret de senha estão presentes (sem expor valores).
+- Binding R2 `COURSE_FILES` configurado para `ceeb-curso-basico-files`.
+- Secret `ADMIN_PASSWORD` deve ser definido no ambiente de produção do Worker.
+- D1 `COURSE_DB` ainda precisa ser vinculado separadamente para publicar edições para todos os alunos.
