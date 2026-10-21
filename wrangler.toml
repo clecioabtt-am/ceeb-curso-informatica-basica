@@ -15,7 +15,8 @@ bucket_name = "ceeb-curso-basico-files"
 # Para persistência global das edições, configure separadamente o D1 COURSE_DB.
 
 # Ative o D1 informando o ID real do banco no Cloudflare:
+# Configure o vínculo COURSE_DB usando o nome e o ID do seu banco D1 real.
 # [[d1_databases]]
 # binding = "COURSE_DB"
-# database_name = "ceeb-curso-basico-db"
+# database_name = "COURSE_DB"
 # database_id = "83e273df-2362-4c63-9c53-1a5cd1df1e96"
