@@ -1,3 +1,4 @@
+
 name = "ceeb-curso-informatica-basica"
 main = "src/worker.js"
 compatibility_date = "2026-09-15"
@@ -5,6 +6,11 @@ compatibility_date = "2026-09-15"
 [assets]
 directory = "./public"
 binding = "ASSETS"
+
+[[r2_buckets]]
+binding = "COURSE_FILES"
+bucket_name = "ceeb-curso-basico-files"
+
 
 # Para trocar a senha no ambiente publicado:
 # npx wrangler secret put ADMIN_PASSWORD
