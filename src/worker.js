@@ -18,6 +18,21 @@ export default {async fetch(request,env){const url=new URL(request.url); if(url.
  }
  if(path==='/api/admin/check')return json({authenticated:valid(tokenOf(request))});
  if(path==='/api/admin/logout'&&request.method==='POST'){sessions.delete(tokenOf(request));return json({ok:true});}
+ if(path.startsWith('/api/media/')&&request.method==='GET'){
+  if(!env.COURSE_FILES)return json({error:'R2 não configurado.'},503);
+  const key=decodeURIComponent(path.slice('/api/media/'.length));if(!/^course-videos\/[a-zA-Z0-9-]+\.(mp4|webm)$/.test(key))return json({error:'Arquivo inválido.'},400);
+  const object=await env.COURSE_FILES.get(key);if(!object)return json({error:'Não encontrado.'},404);
+  return new Response(object.body,{headers:{'content-type':object.httpMetadata?.contentType||'video/mp4','cache-control':'public, max-age=3600','accept-ranges':'none','x-content-type-options':'nosniff'}});
+ }
+ if(path==='/api/admin/upload'&&request.method==='PUT'){
+  if(!valid(tokenOf(request)))return json({error:'Não autorizado.'},401);
+  if(!env.COURSE_FILES)return json({error:'Configure o binding R2 COURSE_FILES no wrangler.toml.'},503);
+  const mime=request.headers.get('content-type')||'';
+  if(!['video/mp4','video/webm'].includes(mime))return json({error:'Somente MP4 ou WebM.'},415);
+  const len=Number(request.headers.get('content-length')||0);if(len>100*1024*1024)return json({error:'Máximo 100 MB.'},413);
+  const key='course-videos/'+crypto.randomUUID()+(mime==='video/webm'?'.webm':'.mp4');
+  try{await env.COURSE_FILES.put(key,request.body,{httpMetadata:{contentType:mime}});return json({url:'/api/media/'+key})}catch(e){return json({error:'Falha no armazenamento R2.'},500)}
+ }
  if(path==='/api/admin/overrides'){
   if(!valid(tokenOf(request))&&request.method!=='GET')return json({error:'Não autorizado.'},401);
   if(request.method==='GET'){
