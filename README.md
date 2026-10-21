@@ -59,3 +59,13 @@ As sessões agora usam tokens assinados com HMAC-SHA256, válidos entre instânc
 - A persistência das alterações do curso exige configurar o binding D1 `COURSE_DB` com o ID real do banco e aplicar `schema.sql`.
 - O deploy automático depende de a integração Cloudflare Builds/GitHub receber os eventos de push. O ZIP não consegue reparar uma integração externa que não esteja acionando builds.
 - Faça upload dos arquivos extraídos na raiz da branch `main`, preservando as pastas `src` e `public`. Verifique em Cloudflare > Deployments se o commit novo aparece.
+
+
+## V6 — correção de login administrativo
+
+Corrigida a importação da chave Web Crypto para HMAC-SHA-256 em `src/worker.js`.
+O algoritmo de hash é obrigatório em `crypto.subtle.importKey` para chaves HMAC; sua ausência causava falha HTTP 500 após a senha correta.
+
+No Cloudflare Production mantenha os Secrets `ADMIN_PASSWORD` e `ADMIN_SESSION_SECRET`.
+Para usar D1, mantenha no `wrangler.toml` o binding `COURSE_DB` com o `database_id` real do banco.
+O pacote preserva a configuração original do wrangler.toml para evitar inserir UUID desconhecido; caso já tenha um `wrangler.toml` funcional com D1, preserve sua seção `[[d1_databases]]` ao atualizar.

@@ -3,12 +3,12 @@ name = "ceeb-curso-informatica-basica"
 main = "src/worker.js"
 compatibility_date = "2026-09-15"
 
-# Arquivos do site
+# Arquivos estáticos do sistema
 [assets]
 directory = "./public"
 binding = "ASSETS"
 
-# Armazenamento R2 - Videoaulas
+# Armazenamento R2 para videoaulas
 [[r2_buckets]]
 binding = "COURSE_FILES"
 bucket_name = "ceeb-curso-basico-files"
@@ -19,8 +19,6 @@ binding = "COURSE_DB"
 database_name = "ceeb-curso-basico-db"
 database_id = "83e273df-2362-4c63-9c53-1a5cd1df1e96"
 
-# Variáveis Secret configuradas no Cloudflare:
+# Secrets configurados no Cloudflare:
 # ADMIN_PASSWORD
 # ADMIN_SESSION_SECRET
-#
-# Nunca coloque senhas diretamente neste arquivo.

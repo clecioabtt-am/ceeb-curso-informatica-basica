@@ -4,7 +4,7 @@ const tokenOf = request => (request.headers.get('authorization')||'').replace(/^
 const b64 = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64 = str => Uint8Array.from(atob(str.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-str.length%4)%4)), c=>c.charCodeAt(0));
 async function signature(secret, payload){
- const key=await crypto.subtle.importKey('raw',enc.encode(secret),'HMAC',false,['sign']);
+ const key=await crypto.subtle.importKey('raw',enc.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
  return b64(new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode(payload))));
 }
 async function valid(request,env){
