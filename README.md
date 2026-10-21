@@ -6,7 +6,7 @@ Projeto Cloudflare Worker + assets estáticos. Acesso do aluno liberado para tes
 
 1. Crie o repositório `ceeb-curso-informatica-basica` e envie o conteúdo desta pasta (não o ZIP fechado).
 2. No Cloudflare, conecte o repositório em Workers & Pages e publique usando `npx wrangler deploy`.
-3. Configure o secret `ADMIN_PASSWORD` no Worker. A senha de testes solicitada é `Clecio40`; troque antes do lançamento.
+3. Configure o secret `ADMIN_PASSWORD` no Worker. O secret `ADMIN_PASSWORD` é obrigatório; não há senha padrão no código.
 4. Para alterações de conteúdo compartilhadas, crie D1 `ceeb-curso-basico-db`, execute o `schema.sql` no console e adicione ao `wrangler.toml`:
 
 ```toml
@@ -33,3 +33,9 @@ bucket_name = "ceeb-curso-basico-files"
 - As práticas originais ainda usam marcação manual; os simuladores de Windows, digitação, Excel e pastas seguem didáticos e básicos. Para validação automática de cada missão, desenvolver exercícios especializados por tópico.
 - Videoaulas não estão pré-carregadas: o administrador deverá adicioná-las. A aba de vídeo foi criada para todos os tópicos.
 - A plataforma principal CEEB ACADEMY e o Asaas não foram alterados.
+
+## Correção de autenticação dos uploads
+
+As sessões agora usam tokens assinados com HMAC-SHA256, válidos entre instâncias do Cloudflare Worker por 8 horas. Configure `ADMIN_PASSWORD` como secret no Worker. Opcionalmente, configure também `ADMIN_SESSION_SECRET` com uma chave aleatória longa e independente. Depois do deploy, saia do painel administrativo e entre novamente para receber um token novo.
+
+**Observação:** o logout remove o token do navegador, mas não revoga imediatamente um token já copiado; ele expira em até 8 horas. Alterar `ADMIN_SESSION_SECRET` invalida todas as sessões. O endpoint de upload continua limitado a 100 MB, mas limites efetivos da plataforma Cloudflare podem ser menores conforme o plano.
