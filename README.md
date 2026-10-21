@@ -77,3 +77,10 @@ No ADM, selecione um módulo e cole texto formatado no editor de cada tópico. E
 Atenção: imagens coladas de sites externos podem não ser transportadas pelo navegador; nesse caso, envie os arquivos pelo botão Inserir imagens. Elementos interativos do ChatGPT não são transferidos automaticamente. O editor preserva HTML básico, tabelas, listas, títulos e imagens HTTPS; scripts e embeds são removidos por segurança.
 
 Para ativar o D1, descomente [[d1_databases]] em wrangler.toml e substitua database_id pelo ID real. Execute schema.sql no banco remoto ou no SQL Editor do painel Cloudflare. O schema usa CREATE TABLE IF NOT EXISTS e preserva dados existentes.
+
+## V9 — Gestão de conteúdo existente
+- Ao entrar no ADM, o aplicativo consulta novamente `/api/admin/overrides` no D1 e carrega os tópicos, HTML, imagens e vídeos publicados. Se a leitura do D1 falhar, a publicação fica bloqueada para evitar sobrescrever conteúdo existente.
+- Cada tópico mostra miniaturas das imagens do HTML e lista de vídeos com ações de exclusão. É necessário clicar em **Salvar alterações** para publicar as remoções.
+- A exclusão remove a referência da aula, mas **não apaga automaticamente o objeto físico no R2**. Essa escolha evita apagar arquivos ainda referenciados em outras aulas. Para liberar armazenamento, remova objetos não utilizados manualmente no R2 após conferir as referências.
+- Configure o binding `COURSE_DB` no wrangler.toml com o ID real do D1 e mantenha o binding `COURSE_FILES` apontando para o bucket R2 correto. Execute `schema.sql` no D1 se a tabela `settings` ainda não existir.
+- Conteúdos salvos somente no navegador antes da configuração do D1 não podem ser recuperados automaticamente de outros aparelhos.
