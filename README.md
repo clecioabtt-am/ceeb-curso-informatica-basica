@@ -47,3 +47,15 @@ As sessões agora usam tokens assinados com HMAC-SHA256, válidos entre instânc
 - Binding R2 `COURSE_FILES` configurado para `ceeb-curso-basico-files`.
 - Secret `ADMIN_PASSWORD` deve ser definido no ambiente de produção do Worker.
 - D1 `COURSE_DB` ainda precisa ser vinculado separadamente para publicar edições para todos os alunos.
+
+
+## V5 — diagnóstico e deploy
+
+- A rota `/api/health` retorna apenas indicadores booleanos (não revela segredos).
+- Erros inesperados retornam `WORKER_INTERNAL_ERROR` e ficam registrados em Observability > Logs.
+- O login devolve `ADMIN_SESSION_SIGNING_FAILED` caso a assinatura da sessão falhe.
+- Bucket R2: `ceeb-curso-basico-files` com binding `COURSE_FILES`.
+- Defina `ADMIN_PASSWORD` em Settings > Variables and Secrets no ambiente de produção.
+- A persistência das alterações do curso exige configurar o binding D1 `COURSE_DB` com o ID real do banco e aplicar `schema.sql`.
+- O deploy automático depende de a integração Cloudflare Builds/GitHub receber os eventos de push. O ZIP não consegue reparar uma integração externa que não esteja acionando builds.
+- Faça upload dos arquivos extraídos na raiz da branch `main`, preservando as pastas `src` e `public`. Verifique em Cloudflare > Deployments se o commit novo aparece.

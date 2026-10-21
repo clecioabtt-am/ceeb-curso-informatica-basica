@@ -12,4 +12,4 @@ bucket_name = "ceeb-curso-basico-files"
 
 # Configure ADMIN_PASSWORD como Secret no painel Cloudflare.
 # Não coloque senhas em arquivos versionados no GitHub.
-# Para persistência global das edições, configure separadamente o D1 COURSE_DB. 
+# Para persistência global das edições, configure separadamente o D1 COURSE_DB.

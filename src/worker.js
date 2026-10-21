@@ -22,9 +22,9 @@ async function valid(request,env){
   return diff===0;
  }catch{return false;}
 }
-export default {async fetch(request,env){const url=new URL(request.url); if(url.pathname.startsWith('/api/')){
+async function handleRequest(request,env){const url=new URL(request.url); if(url.pathname.startsWith('/api/')){
  const path=url.pathname;
- if(path==='/api/health')return json({ok:true,service:'CEEB Informática Básica',r2Configured:!!env.COURSE_FILES,d1Configured:!!env.COURSE_DB,adminPasswordConfigured:!!env.ADMIN_PASSWORD});
+ if(path==='/api/health')return json({ok:true,service:'CEEB Informática Básica',r2Configured:!!env.COURSE_FILES,d1Configured:!!env.COURSE_DB,adminPasswordConfigured:!!env.ADMIN_PASSWORD,adminSessionSecretConfigured:!!env.ADMIN_SESSION_SECRET});
  if(path==='/api/status')return json({ok:true,mode:'open-test',platform:'CEEB Informática Básica'});
  if(path==='/api/admin/login'&&request.method==='POST'){
   const {password=''}=await request.json().catch(()=>({}));
@@ -34,7 +34,7 @@ export default {async fetch(request,env){const url=new URL(request.url); if(url.
   let diff=a.length^b.length;for(let i=0;i<Math.max(a.length,b.length);i++)diff|=(a[i]||0)^(b[i]||0);
   if(diff!==0)return json({error:'Senha incorreta.'},401);
   const payload=b64(enc.encode(JSON.stringify({v:1,exp:Date.now()+8*60*60*1000,nonce:crypto.randomUUID()})));
-  const token=payload+'.'+await signature(env.ADMIN_SESSION_SECRET||expected,payload);
+  let token;try{token=payload+'.'+await signature(env.ADMIN_SESSION_SECRET||expected,payload)}catch(error){console.error('Admin signing failed',error?.name,error?.message);return json({error:'Falha ao criar sessão administrativa.',code:'ADMIN_SESSION_SIGNING_FAILED'},500)}
   return json({token,expiresIn:28800});
  }
  if(path==='/api/admin/check')return json({authenticated:await valid(request,env)});
@@ -69,5 +69,16 @@ export default {async fetch(request,env){const url=new URL(request.url); if(url.
  }
  return json({error:'Rota não encontrada.'},404);
  }
+ if(!env.ASSETS)return json({error:'Binding ASSETS não configurado.',code:'ASSETS_MISSING'},503);
  return env.ASSETS.fetch(request);
- }};
+}
+export default {
+ async fetch(request,env){
+  try{return await handleRequest(request,env)}
+  catch(error){
+   const path=new URL(request.url).pathname;
+   console.error('Worker request failure', {path,method:request.method,name:error?.name||'Error',message:String(error?.message||'Unknown').slice(0,250)});
+   return json({error:'Erro interno no Worker. Consulte Observability > Logs.',code:'WORKER_INTERNAL_ERROR',path},500);
+  }
+ }
+};
