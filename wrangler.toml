@@ -1,0 +1,11 @@
+name = "ceeb-curso-informatica-basica"
+main = "src/worker.js"
+compatibility_date = "2026-09-15"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Para trocar a senha no ambiente publicado:
+# npx wrangler secret put ADMIN_PASSWORD
+# O projeto inicia com senha provisória Clecio40 (somente para testes).
