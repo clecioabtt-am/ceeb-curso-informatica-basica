@@ -37,6 +37,24 @@ async function handleRequest(request,env){const url=new URL(request.url); if(url
   const score=Math.round(hits/quiz.length*100);
   try{await env.COURSE_DB.prepare('INSERT INTO quiz_records (learner,module,answers,questions,score,submitted_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(learner,module) DO UPDATE SET answers=excluded.answers,questions=excluded.questions,score=excluded.score,submitted_at=excluded.submitted_at').bind(learner,module,JSON.stringify(answers),JSON.stringify(quiz.map(q=>q[0])),score).run();return json({ok:true,score});}catch(e){return json({error:'Execute o schema.sql da V14 no D1 para registrar as respostas.'},503)}
  }
+ if(path==='/api/final/submit'&&request.method==='POST'){
+  if(!env.COURSE_DB)return json({error:'Banco D1 indisponível.'},503);
+  const body=await request.json().catch(()=>({}));
+  const {learner,answers}=body;
+  if(typeof learner!=='string'||!/^[a-f0-9-]{36}$/.test(learner)||!Array.isArray(answers)||answers.length!==10||answers.some(a=>!Number.isInteger(a)||a<0||a>3))return json({error:'Dados da avaliação inválidos.'},400);
+  try{
+   const rows=await env.COURSE_DB.prepare('SELECT module,score FROM quiz_records WHERE learner=?').bind(learner).all();
+   const passed=new Set((rows.results||[]).filter(r=>r.score>=60).map(r=>r.module));
+   if(Array.from({length:12},(_,i)=>i).some(i=>!passed.has(i)))return json({error:'Conclua os quizzes dos 12 módulos antes de realizar a avaliação final.'},403);
+   const questions=[
+    1,2,0,3,1,0,2,3,1,2
+   ];
+   const hits=answers.filter((a,i)=>a===questions[i]).length;
+   const grade=hits;const approved=grade>=5;
+   await env.COURSE_DB.prepare('INSERT INTO final_assessments (learner,answers,score,approved,submitted_at) VALUES (?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(learner) DO UPDATE SET answers=excluded.answers,score=excluded.score,approved=excluded.approved,submitted_at=excluded.submitted_at').bind(learner,JSON.stringify(answers),grade,approved?1:0).run();
+   return json({ok:true,score:grade,approved,hits,total:10});
+  }catch(e){console.error('final_assessment',e?.message);return json({error:'Não foi possível registrar a avaliação no D1. Confira a tabela final_assessments.'},503)}
+ }
  if(path==='/api/health')return json({ok:true,service:'CEEB Informática Básica',r2Configured:!!env.COURSE_FILES,d1Configured:!!env.COURSE_DB,adminPasswordConfigured:!!env.ADMIN_PASSWORD,adminSessionSecretConfigured:!!env.ADMIN_SESSION_SECRET});
  if(path==='/api/tutor'&&request.method==='POST'){
   if(!env.GEMINI_API_KEY)return json({error:'Professor virtual ainda não configurado. As missões continuam disponíveis.'},503);
