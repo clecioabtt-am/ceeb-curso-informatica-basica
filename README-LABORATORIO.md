@@ -13,7 +13,7 @@ O SQL utiliza `CREATE TABLE IF NOT EXISTS` e preserva a tabela de configuraçõe
 `npx wrangler secret put ADMIN_SESSION_SECRET`
 `npx wrangler secret put GEMINI_API_KEY`
 
-`GEMINI_API_KEY` é opcional: sem ela, o laboratório e os quizzes funcionam normalmente. Os limites e a disponibilidade do plano gratuito variam conforme o Google. O sistema utiliza o modelo gemini-2.5-flash; ajuste o modelo no Worker se sua chave não tiver acesso.
+`GEMINI_API_KEY` é opcional: sem ela, o laboratório e os quizzes funcionam normalmente. Os limites e a disponibilidade do plano gratuito variam conforme o Google. O sistema tenta os modelos Gemini 3.5 Flash e 3.6 Flash conforme a configuração da V12.
 
 ### 3. Publicação
 `npm install`
@@ -27,10 +27,13 @@ A aba Prática foi removida. Há três missões dentro do Laboratório para cada
 
 ### Observações
 - A chave da IA fica exclusivamente como Secret do Worker.
-- Limite didático inicial: 5 perguntas por dia por identificador anônimo de IP (aproximado; dispositivos compartilhando IP dividem a cota).
+- Sem limite interno de perguntas ao Professor Virtual. Permanecem válidas as cotas e regras da API do Google.
 - Não enviar dados pessoais ao tutor.
 - Este pacote não instala nem configura recursos na sua conta Cloudflare automaticamente; as ligações são declaradas no wrangler e só entram em operação após o deploy na sua conta.
 
 
 ### V12 — Tutor Gemini com fallback
 O Worker tenta `gemini-3.5-flash` e, caso não haja resposta válida, `gemini-3.6-flash`. Aviso: segundo a documentação Google de outubro de 2026, a API já redireciona chamadas 3.5 ao modelo 3.6; o fallback pode não resolver erros compartilhados de credenciais ou cota. Erros de autenticação/cota não geram tentativa redundante. O contador diário é revertido se nenhuma resposta for obtida.
+
+### V13 — Tutor sem limite interno
+Foi removida a contagem por IP/dia e a dependência do D1 para perguntas ao tutor. Nenhuma alteração no schema é necessária. A integração continua usando `GEMINI_API_KEY` e a tentativa de modelos definida na V12. Limites da API Google permanecem.
