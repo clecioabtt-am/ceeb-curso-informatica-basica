@@ -30,3 +30,7 @@ A aba Prática foi removida. Há três missões dentro do Laboratório para cada
 - Limite didático inicial: 5 perguntas por dia por identificador anônimo de IP (aproximado; dispositivos compartilhando IP dividem a cota).
 - Não enviar dados pessoais ao tutor.
 - Este pacote não instala nem configura recursos na sua conta Cloudflare automaticamente; as ligações são declaradas no wrangler e só entram em operação após o deploy na sua conta.
+
+
+### V12 — Tutor Gemini com fallback
+O Worker tenta `gemini-3.5-flash` e, caso não haja resposta válida, `gemini-3.6-flash`. Aviso: segundo a documentação Google de outubro de 2026, a API já redireciona chamadas 3.5 ao modelo 3.6; o fallback pode não resolver erros compartilhados de credenciais ou cota. Erros de autenticação/cota não geram tentativa redundante. O contador diário é revertido se nenhuma resposta for obtida.
