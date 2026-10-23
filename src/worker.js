@@ -45,12 +45,12 @@ async function handleRequest(request,env){const url=new URL(request.url); if(url
   try{
    const rows=await env.COURSE_DB.prepare('SELECT module,score FROM quiz_records WHERE learner=?').bind(learner).all();
    const passed=new Set((rows.results||[]).filter(r=>r.score>=60).map(r=>r.module));
-   if(Array.from({length:12},(_,i)=>i).some(i=>!passed.has(i)))return json({error:'Conclua os quizzes dos 12 módulos antes de realizar a avaliação final.'},403);
+   if(Array.from({length:11},(_,i)=>i).some(i=>!passed.has(i)))return json({error:'Conclua os quizzes dos 11 módulos antes de realizar a avaliação final.'},403);
    const questions=[
     1,2,0,3,1,0,2,3,1,2
    ];
    const hits=answers.filter((a,i)=>a===questions[i]).length;
-   const grade=hits;const approved=grade>=5;
+   const grade=hits*2;const approved=grade>=10;
    await env.COURSE_DB.prepare('INSERT INTO final_assessments (learner,answers,score,approved,submitted_at) VALUES (?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(learner) DO UPDATE SET answers=excluded.answers,score=excluded.score,approved=excluded.approved,submitted_at=excluded.submitted_at').bind(learner,JSON.stringify(answers),grade,approved?1:0).run();
    return json({ok:true,score:grade,approved,hits,total:10});
   }catch(e){console.error('final_assessment',e?.message);return json({error:'Não foi possível registrar a avaliação no D1. Confira a tabela final_assessments.'},503)}
