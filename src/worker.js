@@ -29,7 +29,7 @@ async function handleRequest(request,env){const url=new URL(request.url); if(url
   if(!env.COURSE_DB)return json({error:'Banco D1 indisponível para registrar o quiz.'},503);
   const body=await request.json().catch(()=>({}));
   const {learner,module,answers}=body;
-  if(typeof learner!=='string'||!/^[a-f0-9-]{36}$/.test(learner)||!Number.isInteger(module)||module<0||module>=12||!Array.isArray(answers))return json({error:'Registro inválido.'},400);
+  if(typeof learner!=='string'||!/^[a-f0-9-]{36}$/.test(learner)||!Number.isInteger(module)||module<0||module>=MODULES.length||!Array.isArray(answers))return json({error:'Registro inválido.'},400);
   let quiz=MODULES[module].quiz;
   try{const row=await env.COURSE_DB.prepare('SELECT data FROM settings WHERE key=?').bind('course_overrides').first();const overrides=row?JSON.parse(row.data):{};if(Array.isArray(overrides[module]?.quiz))quiz=overrides[module].quiz;}catch{}
   if(answers.length!==quiz.length||answers.some((a,i)=>!Number.isInteger(a)||a<0||a>=quiz[i][1].length))return json({error:'Respostas inválidas.'},400);
